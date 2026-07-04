@@ -111,7 +111,6 @@ services:
       BOT_RUNTIME_SECRET: ${BOT_RUNTIME_SECRET:-evo-bot-runtime-dev-secret}
       BOT_RUNTIME_POSTBACK_BASE_URL: http://evo-crm:3000
     volumes:
-      - ./evo-ai-crm-community:/app:delegated
       - crm_bundle:/usr/local/bundle
       - crm_node_modules:/app/node_modules
       - crm_cache:/app/tmp/cache
@@ -122,7 +121,7 @@ services:
         condition: service_healthy
       evo-auth:
         condition: service_healthy
-    entrypoint: docker/entrypoints/rails.sh
+    entrypoint: ["/bin/sh", "/app/docker/entrypoints/rails.sh"]
     command: ["bundle", "exec", "rails", "s", "-p", "3000", "-b", "0.0.0.0"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health/live"]
@@ -151,7 +150,6 @@ services:
       BOT_RUNTIME_SECRET: ${BOT_RUNTIME_SECRET:-evo-bot-runtime-dev-secret}
       BOT_RUNTIME_POSTBACK_BASE_URL: http://evo-crm:3000
     volumes:
-      - ./evo-ai-crm-community:/app:delegated
       - crm_bundle:/usr/local/bundle
       - crm_node_modules:/app/node_modules
       - crm_cache:/app/tmp/cache
@@ -160,7 +158,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    entrypoint: docker/entrypoints/rails.sh
+      evo-auth:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "/app/docker/entrypoints/rails.sh"]
     command: ["bundle", "exec", "sidekiq", "-C", "config/sidekiq.yml"]
 
   # ---------------------------------------------------------------------------
@@ -189,7 +189,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5555/api/v1/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5555/health"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -222,6 +222,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      evo-core:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -282,6 +284,8 @@ services:
       evo-auth:
         condition: service_healthy
       evo-crm:
+        condition: service_healthy
+      evo-processor:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
