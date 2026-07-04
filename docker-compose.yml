@@ -294,6 +294,44 @@ services:
       retries: 3
       start_period: 15s
 
+  # ---------------------------------------------------------------------------
+  # Evolution Go (WhatsApp API server) — Port 8085
+  # ---------------------------------------------------------------------------
+  evo-evolution-go:
+    build:
+      context: ./evolution-go
+      dockerfile: Dockerfile
+      args:
+        VERSION: 0.6.1
+    restart: unless-stopped
+    ports:
+      - "8085:8080"
+    environment:
+      SERVER_PORT: "8080"
+      # Two databases, one for auth, one for users/messages.
+      # Reuse the stack Postgres with dedicated database names.
+      POSTGRES_AUTH_DB: postgresql://${POSTGRES_USERNAME:-postgres}:${POSTGRES_PASSWORD:-evoai_dev_password}@postgres:5432/evogo_auth?sslmode=disable
+      POSTGRES_USERS_DB: postgresql://${POSTGRES_USERNAME:-postgres}:${POSTGRES_PASSWORD:-evoai_dev_password}@postgres:5432/evogo_users?sslmode=disable
+      DATABASE_SAVE_MESSAGES: "false"
+      CLIENT_NAME: EvoCRM
+      GLOBAL_API_KEY: ${EVOLUTION_GO_GLOBAL_API_KEY:-evo-go-dev-key-change-me}
+      OS_NAME: EvoCRM
+      TZ: America/Sao_Paulo
+      WADEBUG: INFO
+      LOGTYPE: console
+      AMQP_GLOBAL_ENABLED: "false"
+      AMQP_URL: ""
+      MINIO_ENABLED: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
 volumes:
   postgres_data:
   redis_data:
