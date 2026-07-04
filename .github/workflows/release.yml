@@ -34,6 +34,9 @@ jobs:
           - service: evo-ai-core-service-community
             context: ./evo-ai-core-service-community
             dockerfile: ./evo-ai-core-service-community/Dockerfile
+          - service: evo-bot-runtime
+            context: ./evo-bot-runtime
+            dockerfile: ./evo-bot-runtime/Dockerfile
 
     steps:
       - uses: actions/checkout@v4
@@ -92,4 +95,5 @@ jobs:
             docker pull ghcr.io/evolutionapi/evo-ai-frontend-community:${{ github.ref_name }}
             docker pull ghcr.io/evolutionapi/evo-ai-processor-community:${{ github.ref_name }}
             docker pull ghcr.io/evolutionapi/evo-ai-core-service-community:${{ github.ref_name }}
+            docker pull ghcr.io/evolutionapi/evo-bot-runtime:${{ github.ref_name }}
             ```
