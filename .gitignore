@@ -1,2 +1,5 @@
 .env
 _evo*
+# Local dev workarounds
+.crm-tmp/
+
